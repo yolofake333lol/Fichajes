@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Fichajes</title>
+<meta name="theme-color" content="#1f3a5f">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root{
+    --fondo:#eef2f6; --texto:#14202e; --azul:#1f3a5f; --boton:#ffffff;
+    --borde:#c9d3de; --rojo:#b3261e; --gris:#5b6b7c;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;background:var(--fondo);color:var(--texto);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    user-select:none;-webkit-user-select:none}
+  body{display:flex;flex-direction:column;overflow:hidden}
+
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 20px;background:var(--azul);color:#fff;flex:0 0 auto}
+  #titulo{font-size:clamp(20px,3vw,30px);font-weight:700}
+  #reloj{font-size:clamp(18px,2.6vw,28px);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+  #reloj small{display:block;font-size:.6em;opacity:.8}
+
+  #rejilla{flex:1 1 auto;display:grid;gap:14px;padding:14px;min-height:0}
+  .nombre{border:2px solid var(--borde);background:var(--boton);border-radius:18px;
+    font-size:clamp(22px,4.2vw,52px);font-weight:700;color:var(--texto);
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:8px;line-height:1.1;box-shadow:0 2px 6px rgba(0,0,0,.08);
+    cursor:pointer;min-height:0;overflow:hidden;word-break:break-word;font-family:inherit}
+  .nombre:active{background:var(--azul);color:#fff;transform:scale(.98)}
+  #vacio{display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;font-size:clamp(20px,3vw,30px);color:var(--gris);gap:10px;padding:20px}
+
+  footer{flex:0 0 auto;display:flex;justify-content:flex-end;padding:0 14px 10px}
+  #engranaje{width:52px;height:52px;border-radius:50%;border:none;background:transparent;
+    color:var(--gris);font-size:28px;opacity:.4;transition:opacity .2s, background 2s}
+  #engranaje.cargando{opacity:1;background:#c9d3de}
+
+  #aviso{position:fixed;inset:0;background:rgba(20,32,46,.94);color:#fff;display:none;
+    flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    padding:30px;gap:18px;z-index:10}
+  #aviso.visible{display:flex}
+  #aviso .grande{font-size:clamp(30px,6vw,64px);font-weight:800}
+  #aviso .peque{font-size:clamp(18px,3vw,30px);opacity:.9;max-width:900px}
+  #aviso button{margin-top:10px;font-size:clamp(20px,3vw,30px);padding:16px 40px;border-radius:14px;
+    border:none;background:#fff;color:var(--azul);font-weight:700}
+
+  #ajustes{position:fixed;inset:0;background:var(--fondo);display:none;flex-direction:column;z-index:20;
+    user-select:text;-webkit-user-select:text}
+  #ajustes.visible{display:flex}
+  #ajustes .barra{display:flex;align-items:center;justify-content:space-between;
+    background:var(--azul);color:#fff;padding:12px 20px;font-size:22px;font-weight:700}
+  #ajustes .barra button{font-size:18px;padding:10px 20px;border-radius:10px;border:none;background:#fff;color:var(--azul);font-weight:700}
+  #ajustes .cuerpo{flex:1;overflow:auto;padding:16px 20px 40px;max-width:900px;width:100%;margin:0 auto}
+  #ajustes h3{margin:22px 0 8px;font-size:20px}
+  p.ayuda{margin:4px 0 10px;color:var(--gris);font-size:15px;line-height:1.4}
+  .fila{display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--borde);
+    border-radius:12px;padding:10px;margin-bottom:8px;flex-wrap:wrap}
+  .fila .info{flex:1 1 200px;min-width:0}
+  .fila .info b{font-size:19px;display:block}
+  .fila .info span{color:var(--gris);font-size:14px}
+  .fila button,.accion{font-size:16px;padding:10px 14px;border-radius:10px;border:1px solid var(--borde);
+    background:#fff;color:var(--texto);font-weight:600;font-family:inherit}
+  .fila button:disabled{opacity:.35}
+  .accion.principal{background:var(--azul);color:#fff;border-color:var(--azul)}
+  .peligro{color:var(--rojo)!important;border-color:#e6b3af!important}
+  form.editor{background:#fff;border:2px solid var(--azul);border-radius:12px;padding:14px;margin:8px 0 14px;display:grid;gap:10px}
+  form.editor label{font-size:15px;font-weight:600;display:grid;gap:4px}
+  form.editor input, form.editor textarea{font-size:18px;padding:10px;border:1px solid var(--borde);border-radius:8px;width:100%;font-family:inherit}
+  form.editor textarea{font-size:13px;font-family:ui-monospace,monospace;min-height:70px}
+  .botones{display:flex;gap:8px;flex-wrap:wrap}
+  details{background:#fff;border:1px solid var(--borde);border-radius:12px;padding:10px 14px;margin-top:10px}
+  details summary{font-weight:700;font-size:17px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<header>
+  <div id="titulo">Toca tu nombre para fichar</div>
+  <div id="reloj"></div>
+</header>
+
+<main id="rejilla"></main>
+
+<footer>
+  <button id="engranaje" aria-label="Ajustes (mantener pulsado)">⚙</button>
+</footer>
+
+<div id="aviso" role="dialog" aria-live="assertive">
+  <div class="grande" id="avisoNombre"></div>
+  <div class="peque">Abriendo la página de fichajes…<br>Cuando termines, vuelve a esta pantalla.</div>
+  <button id="avisoVolver">Volver</button>
+</div>
+
+<div id="ajustes">
+  <div class="barra"><span>Ajustes</span><button id="cerrarAjustes">Cerrar</button></div>
+  <div class="cuerpo">
+    <h3>Trabajadores</h3>
+    <p class="ayuda">Los datos se guardan solo en esta tablet, no en internet. Si se borran los datos del navegador o se desinstala la app, se pierden: haz una copia de seguridad (abajo).</p>
+    <div id="listaTrab"></div>
+    <div id="huecoEditor"></div>
+    <button class="accion principal" id="anadir">+ Añadir trabajador</button>
+
+    <h3>Copia de seguridad</h3>
+    <p class="ayuda">Descarga un archivo con todos los trabajadores (lleva las contraseñas, guárdalo en sitio seguro) o recupéralo en otra tablet.</p>
+    <div class="botones">
+      <button class="accion" id="exportar">Descargar copia</button>
+      <button class="accion" id="importar">Cargar copia</button>
+      <input type="file" id="archivoImport" accept=".json,application/json" hidden>
+    </div>
+
+    <details>
+      <summary>Avanzado: datos de la página de fichajes</summary>
+      <p class="ayuda">Solo hay que tocar esto si un día deja de entrar sola y vuelve a salir la pantalla de usuario y contraseña. Entonces saca otra vez el código de la página de fichajes (view-source:) y pásaselo a Claude, o copia aquí los tres valores con el mismo nombre.</p>
+      <form class="editor" id="formAvanzado">
+        <label>Dirección del formulario<input name="url" required></label>
+        <label>__VIEWSTATE<textarea name="vs"></textarea></label>
+        <label>__VIEWSTATEGENERATOR<input name="vsg"></label>
+        <label>__EVENTVALIDATION<textarea name="ev"></textarea></label>
+        <div class="botones">
+          <button class="accion principal" type="submit">Guardar</button>
+          <button class="accion" type="button" id="restaurarAvanzado">Valores de fábrica</button>
+        </div>
+      </form>
+    </details>
+  </div>
+</div>
+
+<!-- Formulario oculto que se envía a la web de fichajes (copia del de la empresa) -->
+<form id="envio" method="post" target="_blank" style="display:none">
+  <input type="hidden" name="__LASTFOCUS" value="">
+  <input type="hidden" name="__EVENTTARGET" value="Button_Acceder">
+  <input type="hidden" name="__EVENTARGUMENT" value="">
+  <input type="hidden" name="__VIEWSTATE">
+  <input type="hidden" name="__VIEWSTATEGENERATOR">
+  <input type="hidden" name="__EVENTVALIDATION">
+  <input type="hidden" name="username">
+  <input type="hidden" name="password">
+</form>
+
+<script>
+/* Valores sacados de la página de login de RODAS (06/10/2026) */
+const FABRICA = {
+  url: "https://controlpresencia.grupoazvi.com/usuario/LOGINRODAS.ASPX",
+  vs:  "/wEPBZACSDRzSUFBQUFBQUFFQUMzTndRN0JNQnpIOGF6YUladlVxU2VaUFFESlJpSzQ0dURtZ0h2NWQ5YWs5cGUyeEd0NUJnL0dGbTcvZlBMUDkvY0pPSXZHZVo1TjU0dkZiSkp4UVpKd2g4NXYxNHptV1pZTFNsaURYVjFWeXBiK2F0aGdoell0NUFQdEtOWFZ4U3FuVW9NdUJlblJBV2x6RURFSk9CYzBvWHYxOUN6Y2dzYXJUTnBIN2ZUSnFCS0F0SGkvemc1YjlTMkNBbjRqMGMzSXN5clJnTEtzYzNCM2FUVXVtMlQ5U2xtOHdzcGI2ZFQ3Sld1TkdnMVl1R25RQXVuOWcxL3VIOWowMUFBQUFBPT1kuJkxgEGRmmVQr3nzZT7/18a99Vw=",
+  vsg: "8C04E1D9",
+  ev:  "/wEdAARqcmK/R6jpNK+z63d3bxkiKhoCyVdJtLIis5AgYZ/RYe4sciJO3Hoc68xTFtZGQEh8DQjdovpcJSWoPeHPvBcEYDHzVXWswYnfY6/mlowtExrYWVY="
+};
+
+const CLAVE_TRAB = "fichajes.trabajadores";
+const CLAVE_AVZ  = "fichajes.avanzado";
+function leer(clave, porDefecto){
+  try { const v = localStorage.getItem(clave); return v ? JSON.parse(v) : porDefecto; }
+  catch(e){ return porDefecto; }
+}
+function guardar(clave, valor){
+  try { localStorage.setItem(clave, JSON.stringify(valor)); }
+  catch(e){ alert("No se ha podido guardar en esta tablet."); }
+}
+let trabajadores = leer(CLAVE_TRAB, []);
+let avanzado = Object.assign({}, FABRICA, leer(CLAVE_AVZ, {}));
+
+/* Reloj */
+const reloj = document.getElementById("reloj");
+function pintarReloj(){
+  const d = new Date();
+  const hora = d.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"});
+  let fecha = d.toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});
+  fecha = fecha.charAt(0).toUpperCase() + fecha.slice(1);
+  reloj.innerHTML = hora + "<small>" + fecha + "</small>";
+}
+pintarReloj(); setInterval(pintarReloj, 10000);
+
+/* Rejilla de nombres a pantalla completa */
+const rejilla = document.getElementById("rejilla");
+function pintarRejilla(){
+  rejilla.innerHTML = "";
+  if (!trabajadores.length){
+    rejilla.style.gridTemplateColumns = "1fr";
+    rejilla.style.gridTemplateRows = "1fr";
+    rejilla.innerHTML = '<div id="vacio"><div>Todavía no hay trabajadores.</div>' +
+      '<div style="font-size:.8em">Mantén pulsado 2 segundos el engranaje ⚙ de abajo a la derecha para añadirlos.</div></div>';
+    return;
+  }
+  const n = trabajadores.length;
+  const ancho = rejilla.clientWidth || innerWidth, alto = rejilla.clientHeight || innerHeight;
+  let mejor = 1, mejorPunt = -1;
+  for (let c = 1; c <= n; c++){
+    const f = Math.ceil(n / c);
+    const punt = Math.min(ancho / c, (alto / f) * 1.8);
+    if (punt > mejorPunt){ mejorPunt = punt; mejor = c; }
+  }
+  rejilla.style.gridTemplateColumns = `repeat(${mejor}, 1fr)`;
+  rejilla.style.gridTemplateRows = `repeat(${Math.ceil(n / mejor)}, 1fr)`;
+  trabajadores.forEach((t, i) => {
+    const b = document.createElement("button");
+    b.className = "nombre";
+    b.textContent = t.nombre;
+    b.addEventListener("click", () => fichar(i));
+    rejilla.appendChild(b);
+  });
+}
+addEventListener("resize", pintarRejilla);
+
+/* Fichar: envía usuario y contraseña a la web de la empresa */
+const aviso = document.getElementById("aviso");
+let temporizadorAviso = null;
+function fichar(i){
+  const t = trabajadores[i];
+  if (!t) return;
+  const f = document.getElementById("envio");
+  f.action = avanzado.url;
+  f.elements["__VIEWSTATE"].value = avanzado.vs;
+  f.elements["__VIEWSTATEGENERATOR"].value = avanzado.vsg;
+  f.elements["__EVENTVALIDATION"].value = avanzado.ev;
+  f.elements["username"].value = t.usuario;
+  f.elements["password"].value = t.clave;
+  f.submit();
+  f.elements["username"].value = "";
+  f.elements["password"].value = "";
+
+  document.getElementById("avisoNombre").textContent = t.nombre;
+  aviso.classList.add("visible");
+  clearTimeout(temporizadorAviso);
+  temporizadorAviso = setTimeout(cerrarAviso, 8000);
+}
+function cerrarAviso(){ aviso.classList.remove("visible"); }
+document.getElementById("avisoVolver").addEventListener("click", cerrarAviso);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) cerrarAviso(); });
+
+/* Ajustes: mantener pulsado el engranaje 2 segundos */
+const engranaje = document.getElementById("engranaje");
+let temporizadorPulsado = null;
+engranaje.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  engranaje.classList.add("cargando");
+  temporizadorPulsado = setTimeout(() => { engranaje.classList.remove("cargando"); abrirAjustes(); }, 2000);
+});
+["pointerup","pointerleave","pointercancel"].forEach(ev => engranaje.addEventListener(ev, () => {
+  clearTimeout(temporizadorPulsado); engranaje.classList.remove("cargando");
+}));
+engranaje.addEventListener("contextmenu", e => e.preventDefault());
+
+const ajustes = document.getElementById("ajustes");
+const listaTrab = document.getElementById("listaTrab");
+const huecoEditor = document.getElementById("huecoEditor");
+function abrirAjustes(){ pintarLista(); rellenarAvanzado(); ajustes.classList.add("visible"); }
+document.getElementById("cerrarAjustes").addEventListener("click", () => {
+  ajustes.classList.remove("visible"); huecoEditor.innerHTML = ""; pintarRejilla();
+});
+
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+function pintarLista(){
+  listaTrab.innerHTML = "";
+  if (!trabajadores.length) listaTrab.innerHTML = '<p class="ayuda">Aún no hay ninguno.</p>';
+  trabajadores.forEach((t, i) => {
+    const fila = document.createElement("div");
+    fila.className = "fila";
+    fila.innerHTML = `<div class="info"><b>${esc(t.nombre)}</b><span>Usuario: ${esc(t.usuario)}</span></div>
+      <button data-a="subir" ${i===0?"disabled":""} aria-label="Subir">▲</button>
+      <button data-a="bajar" ${i===trabajadores.length-1?"disabled":""} aria-label="Bajar">▼</button>
+      <button data-a="probar">Probar</button>
+      <button data-a="editar">Editar</button>
+      <button data-a="borrar" class="peligro">Borrar</button>`;
+    fila.addEventListener("click", e => {
+      const a = e.target.dataset && e.target.dataset.a;
+      if (!a) return;
+      if (a === "subir" && i > 0){ [trabajadores[i-1], trabajadores[i]] = [trabajadores[i], trabajadores[i-1]]; guardar(CLAVE_TRAB, trabajadores); pintarLista(); }
+      if (a === "bajar" && i < trabajadores.length-1){ [trabajadores[i+1], trabajadores[i]] = [trabajadores[i], trabajadores[i+1]]; guardar(CLAVE_TRAB, trabajadores); pintarLista(); }
+      if (a === "editar") mostrarEditor(i);
+      if (a === "probar") fichar(i);
+      if (a === "borrar" && confirm(`¿Borrar a ${t.nombre}?`)){ trabajadores.splice(i,1); guardar(CLAVE_TRAB, trabajadores); pintarLista(); }
+    });
+    listaTrab.appendChild(fila);
+  });
+}
+
+function mostrarEditor(i){
+  const t = i == null ? {nombre:"",usuario:"",clave:""} : trabajadores[i];
+  huecoEditor.innerHTML = `<form class="editor">
+      <label>Nombre que se verá en el botón<input name="nombre" required value="${esc(t.nombre)}" placeholder="Ej.: Manolo"></label>
+      <label>Usuario de la web de fichajes<input name="usuario" required autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(t.usuario)}"></label>
+      <label>Contraseña de la web de fichajes<input name="clave" required autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(t.clave)}"></label>
+      <div class="botones"><button class="accion principal" type="submit">Guardar</button>
+      <button class="accion" type="button" data-cancelar>Cancelar</button></div></form>`;
+  const f = huecoEditor.querySelector("form");
+  f.addEventListener("submit", e => {
+    e.preventDefault();
+    const nuevo = {nombre:f.elements.nombre.value.trim(), usuario:f.elements.usuario.value.trim(), clave:f.elements.clave.value};
+    if (!nuevo.nombre || !nuevo.usuario || !nuevo.clave) return;
+    if (i == null) trabajadores.push(nuevo); else trabajadores[i] = nuevo;
+    guardar(CLAVE_TRAB, trabajadores);
+    huecoEditor.innerHTML = ""; pintarLista();
+  });
+  f.querySelector("[data-cancelar]").addEventListener("click", () => huecoEditor.innerHTML = "");
+  f.scrollIntoView({behavior:"smooth", block:"center"});
+  f.elements.nombre.focus();
+}
+document.getElementById("anadir").addEventListener("click", () => mostrarEditor(null));
+
+/* Copia de seguridad */
+document.getElementById("exportar").addEventListener("click", () => {
+  const datos = JSON.stringify({trabajadores, avanzado}, null, 2);
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([datos], {type:"application/json"}));
+  a.download = "fichajes-copia.json";
+  document.body.appendChild(a); a.click(); a.remove();
+});
+const archivoImport = document.getElementById("archivoImport");
+document.getElementById("importar").addEventListener("click", () => archivoImport.click());
+archivoImport.addEventListener("change", async () => {
+  const f = archivoImport.files[0]; if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (!Array.isArray(d.trabajadores)) throw 0;
+    if (confirm(`Se cargarán ${d.trabajadores.length} trabajadores y se sustituirán los actuales. ¿Seguir?`)){
+      trabajadores = d.trabajadores.filter(t => t && t.nombre && t.usuario && t.clave);
+      guardar(CLAVE_TRAB, trabajadores);
+      if (d.avanzado){ avanzado = Object.assign({}, FABRICA, d.avanzado); guardar(CLAVE_AVZ, avanzado); }
+      pintarLista(); rellenarAvanzado();
+    }
+  } catch(e){ alert("Ese archivo no es una copia válida."); }
+  archivoImport.value = "";
+});
+
+/* Avanzado */
+const formAvz = document.getElementById("formAvanzado");
+function rellenarAvanzado(){
+  formAvz.elements.url.value = avanzado.url; formAvz.elements.vs.value = avanzado.vs;
+  formAvz.elements.vsg.value = avanzado.vsg; formAvz.elements.ev.value = avanzado.ev;
+}
+formAvz.addEventListener("submit", e => {
+  e.preventDefault();
+  avanzado = {url:formAvz.elements.url.value.trim(), vs:formAvz.elements.vs.value.trim(),
+              vsg:formAvz.elements.vsg.value.trim(), ev:formAvz.elements.ev.value.trim()};
+  guardar(CLAVE_AVZ, avanzado); alert("Guardado.");
+});
+document.getElementById("restaurarAvanzado").addEventListener("click", () => {
+  avanzado = Object.assign({}, FABRICA);
+  try { localStorage.removeItem(CLAVE_AVZ); } catch(e){}
+  rellenarAvanzado();
+});
+
+pintarRejilla();
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
